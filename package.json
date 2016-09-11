@@ -1,0 +1,36 @@
+{
+  "name": "md2html2pdf",
+  "version": "1.0.0",
+  "description": "A command-line tool for converting Markdown to HTML to PDF",
+  "main": "index.js",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "showdown": "^1.4.3",
+    "wkhtmltopdf": "^0.3.3"
+  },
+  "devDependencies": {},
+  "bin": {
+    "md2html2pdf": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -f example.html example.pdf"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bencentra/md2html2pdf.git"
+  },
+  "keywords": [
+    "md2html2pdf",
+    "markdown",
+    "html",
+    "pdf",
+    "converter"
+  ],
+  "author": "Ben Centra <blcentra@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bencentra/md2html2pdf/issues"
+  },
+  "homepage": "https://github.com/bencentra/md2html2pdf#readme"
+}
