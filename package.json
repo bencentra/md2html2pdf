@@ -7,6 +7,7 @@
     "commander": "^2.9.0",
     "mustache": "^2.2.1",
     "showdown": "^1.4.3",
+    "stringify": "^5.1.0",
     "wkhtmltopdf": "^0.3.3"
   },
   "devDependencies": {},
@@ -15,7 +16,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "clean": "rm -f example.html example.pdf",
+    "clean": "rm -f example/example.html example/example.pdf",
     "debug": "node debug index.js"
   },
   "repository": {

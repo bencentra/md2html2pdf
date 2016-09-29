@@ -1,6 +1,12 @@
 const fs = require('fs');
 const path = require('path');
+const mustache = require('mustache');
+const stringify = require('stringify');
+stringify.registerWithRequire({
+  extensions: ['.html']
+});
 const File = require('./file');
+const basicTemplate = require('../templates/basic.html');
 
 const showdownOptions = {
   tables: true,
@@ -14,7 +20,6 @@ const wkhtmltopdfOptions = {
 const showdown  = require('showdown');
 const mdtohtml = new showdown.Converter(showdownOptions);
 const wkhtmltopdf = require('wkhtmltopdf');
-const mustache = require('mustache');
 
 function errorHandler() {
   const errors = arguments;
@@ -70,15 +75,26 @@ class Converter {
 
   makeHtml(markdown) {
     const html = mdtohtml.makeHtml(markdown);
-    return Promise.all([
-      File.readFile('templates/basic.html'),
-      File.readFile('example.css')
-    ]).then(values => {
+    const promises = [];
+    if (this.options.template) {
+      promises.push(File.readFile(this.options.template));
+    }
+    else {
+      promises.push(Promise.resolve(basicTemplate));
+      if (this.options.stylesheet) {
+        promises.push(File.readFile(this.options.stylesheet));
+      }
+    }
+    return Promise.all(promises).then(values => {
       const [template, css] = values;
-      return mustache.render(template, {
-        html,
-        css
-      });
+      const options = {
+        title: this.options.title,
+        html
+      };
+      if (css) {
+        options.css = css;
+      }
+      return mustache.render(template, options);
     }).then(combinedHtml => File.writeFile(`${this.file.name}.html`, combinedHtml));
   }
 

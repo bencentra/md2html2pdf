@@ -19,7 +19,8 @@ program
   .arguments('<file>')
   .option('-h --html', 'Convert <file> to HTML')
   .option('-p --pdf', 'Convert <file> to PDF')
-  .option('-t --title', 'Title of the generated HTML file', '')
-  .option('-s --stylesheet', 'Stylesheet to apply to generated HTML')
+  .option('-t --title [title]', 'Title of the generated HTML file', '')
+  .option('-s --stylesheet [path]', 'Stylesheet to apply to generated HTML')
+  .option('-x --template [path]', 'Template to use to generate HTML')
   .action(convertFile)
   .parse(process.argv);
