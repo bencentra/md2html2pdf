@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "commander": "^2.9.0",
+    "mustache": "^2.2.1",
     "showdown": "^1.4.3",
     "wkhtmltopdf": "^0.3.3"
   },

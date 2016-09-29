@@ -13,6 +13,7 @@ const wkhtmltopdfOptions = {
 const showdown  = require('showdown');
 const mdtohtml = new showdown.Converter(showdownOptions);
 const wkhtmltopdf = require('wkhtmltopdf');
+const mustache = require('mustache');
 
 let name = '';
 let type = '';
@@ -47,7 +48,16 @@ function writeFile(file, contents) {
 
 function makeHtml(markdown) {
   const html = mdtohtml.makeHtml(markdown);
-  return writeFile(`${name}.html`, html);
+  return Promise.all([
+    readFile('templates/basic.html'),
+    readFile('example.css')
+  ]).then(values => {
+    const [template, css] = values;
+    return mustache.render(template, {
+      html,
+      css
+    });
+  }).then(combinedHtml => writeFile(`${name}.html`, combinedHtml));
 }
 
 function makePdf(html) {
