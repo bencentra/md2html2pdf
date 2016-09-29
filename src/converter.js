@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const File = require('./file');
 
 const showdownOptions = {
   tables: true,
@@ -15,70 +16,6 @@ const mdtohtml = new showdown.Converter(showdownOptions);
 const wkhtmltopdf = require('wkhtmltopdf');
 const mustache = require('mustache');
 
-let name = '';
-let type = '';
-
-function readFile(file) {
-  const pathToFile = path.join(process.cwd(), file);
-  return new Promise(function(resolve, reject) {
-    fs.readFile(pathToFile, 'utf8', function(error, data) {
-      if (error) {
-        reject(error);
-      }
-      else {
-        resolve(data);
-      }
-    })
-  });
-}
-
-function writeFile(file, contents) {
-  const pathToFile = path.join(process.cwd(), file);
-  return new Promise(function(resolve, reject) {
-    fs.writeFile(pathToFile, contents, function(error) {
-      if (error) {
-        reject(error);
-      }
-      else {
-        resolve(true);
-      }
-    });
-  });
-}
-
-function makeHtml(markdown) {
-  const html = mdtohtml.makeHtml(markdown);
-  return Promise.all([
-    readFile('templates/basic.html'),
-    readFile('example.css')
-  ]).then(values => {
-    const [template, css] = values;
-    return mustache.render(template, {
-      html,
-      css
-    });
-  }).then(combinedHtml => writeFile(`${name}.html`, combinedHtml));
-}
-
-function makePdf(html) {
-  return new Promise(function(resolve) {
-    const pathToFile = path.join(process.cwd(), `${name}.pdf`);
-    const stream = fs.createWriteStream(pathToFile);
-    const errors = [];
-    wkhtmltopdf(html, wkhtmltopdfOptions).pipe(stream);
-    stream.on('error', function(error) {
-      errors.push(error);
-    });
-    stream.on('finish', function() {
-      if (errors.length === 0) {
-        resolve(true);
-      } else {
-        reject(errors);
-      }
-    });
-  })
-}
-
 function errorHandler() {
   const errors = arguments;
   console.error.apply(this, errors);
@@ -91,49 +28,24 @@ function log() {
   }
 }
 
-function isMarkdown(type) {
-  return (['md', 'markdown'].indexOf(type.toLowerCase()) > -1);
-}
+class Converter {
 
-function isHtml(type) {
-  return (type.toLowerCase() === 'html');
-}
+  constructor(options) {
+    this.options = options;
+  }
 
-function isPdf(type) {
-  return (type.toLowerCase() === 'pdf');
-}
-
-const converter = {
-
-  convertMarkdownToHtml(input) {
-    return readFile(input)
-      .then(makeHtml)
-      .then(log('resume.html created successfully!'))
-      .catch(errorHandler);
-  },
-
-  convertHtmlToPdf(input) {
-    return readFile(input)
-      .then(makePdf)
-      .then(log('resume.pdf created successfully!'))
-      .catch(errorHandler);
-  },
-
-  convert(options) {
-    const basename = path.basename(options.file);
-    const dirname = path.dirname(options.file);
-    name = basename.split('.').shift();
-    type = basename.split('.').pop();
-    if (isMarkdown(type) && options.html) {
-      return this.convertMarkdownToHtml(options.file);
+  convert(input) {
+    this.file = new File(input);
+    if (this.file.isMarkdown() && this.options.html) {
+      return this.convertMarkdownToHtml(this.file.path);
     }
-    else if (isHtml(type) && options.pdf) {
-      return this.convertHtmlToPdf(options.file);
+    else if (this.file.isHtml() && this.options.pdf) {
+      return this.convertHtmlToPdf(this.file.path);
     }
-    else if (isMarkdown(type) && options.pdf) {
-      return this.convertMarkdownToHtml(options.file)
+    else if (this.file.isMarkdown() && this.options.pdf) {
+      return this.convertMarkdownToHtml(this.file.path)
         .then(function() {
-          const newFile = `${dirname}/${name}.html`;
+          const newFile = `${this.file.dirname}/${this.file.name}.html`;
           return this.convertHtmlToPdf(newFile);
         }.bind(this));
     }
@@ -142,6 +54,53 @@ const converter = {
     }
   }
 
+  convertMarkdownToHtml(input) {
+    return File.readFile(input)
+      .then(this.makeHtml.bind(this))
+      .then(log('resume.html created successfully!'))
+      .catch(errorHandler);
+  }
+
+  convertHtmlToPdf(input) {
+    return File.readFile(input)
+      .then(this.makePdf.bind(this))
+      .then(log('resume.pdf created successfully!'))
+      .catch(errorHandler);
+  }
+
+  makeHtml(markdown) {
+    const html = mdtohtml.makeHtml(markdown);
+    return Promise.all([
+      File.readFile('templates/basic.html'),
+      File.readFile('example.css')
+    ]).then(values => {
+      const [template, css] = values;
+      return mustache.render(template, {
+        html,
+        css
+      });
+    }).then(combinedHtml => File.writeFile(`${this.file.name}.html`, combinedHtml));
+  }
+
+  makePdf(html) {
+    return new Promise(resolve => {
+      const pathToFile = path.join(process.cwd(), `${this.file.name}.pdf`);
+      const stream = fs.createWriteStream(pathToFile);
+      const errors = [];
+      wkhtmltopdf(html, wkhtmltopdfOptions).pipe(stream);
+      stream.on('error', function(error) {
+        errors.push(error);
+      });
+      stream.on('finish', function() {
+        if (errors.length === 0) {
+          resolve(true);
+        } else {
+          reject(errors);
+        }
+      });
+    });
+  }
+
 }
 
-module.exports = converter;
+module.exports = Converter;

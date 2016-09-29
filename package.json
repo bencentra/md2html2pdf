@@ -15,7 +15,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "clean": "rm -f example.html example.pdf"
+    "clean": "rm -f example.html example.pdf",
+    "debug": "node debug index.js"
   },
   "repository": {
     "type": "git",
