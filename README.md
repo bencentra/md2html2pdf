@@ -19,13 +19,18 @@ $ md2html2pdf --help
 
   Options:
 
-    -h, --help     output usage information
-    -V, --version  output the version number
-    -h --html      Convert <file> to HTML
-    -p --pdf       Convert <file> to PDF
+    -h, --help              output usage information
+    -V, --version           output the version number
+    -h --html               Convert <file> to HTML
+    -p --pdf                Convert <file> to PDF
+    -t --title [title]      Title of the generated HTML file
+    -s --stylesheet [path]  Stylesheet to apply to generated HTML
+    -x --template [path]    Template to use to generate HTML
 ```
 
-For example, to convert the `example.md` file from this project:
+### Basic Examples
+
+To convert the example file from this project, `cd example` and run:
 
 ```bash
 # Markdown to HTML, creates "example.html"
@@ -34,6 +39,31 @@ md2html2pdf --html example.md
 md2html2pdf --pdf example.html
 # Markdown to PDF, creates "example.html" and "example.pdf"
 md2html2pdf --pdf example.md
+```
+
+### Customizing the HTML
+
+Use the `--title` option to provide a title for the HTML file:
+
+```bash
+md2html2pdf --title "My Cool File" --html example.md
+```
+
+Use the `--stylesheet` option to pass in a CSS file you'd like to add to the HTML:
+
+```bash
+md2html2pdf --stylesheet example.css --html example.md
+```
+
+The HTML file is generated from a simple [template](templates/basic.html). The template uses [Mustache](https://github.com/janl/mustache.js/) and expects the following options:
+* `html` - The HTML generated from the Markdown
+* `css` - The CSS read in from the `--stylesheet` option
+* `title` - The title of the html page from the `--title` option (defaults to `''`)
+
+You can provide your own template file using the `--template` option:
+
+```bash
+md2html2pdf --template template.html --html example.md
 ```
 
 ## Development

@@ -2,7 +2,7 @@
 
 const path = require('path');
 const program = require('commander');
-const converter = require('./src/converter');
+const Converter = require('./src/converter');
 const pkg = require('./package.json');
 
 const defaults = {
@@ -10,11 +10,8 @@ const defaults = {
 };
 
 function convertFile(file) {
-  converter.convert({
-    file,
-    html: program.html,
-    pdf: program.pdf
-  });
+  const converter = new Converter(program);
+  converter.convert(file);
 }
 
 program
@@ -22,5 +19,8 @@ program
   .arguments('<file>')
   .option('-h --html', 'Convert <file> to HTML')
   .option('-p --pdf', 'Convert <file> to PDF')
+  .option('-t --title [title]', 'Title of the generated HTML file', '')
+  .option('-s --stylesheet [path]', 'Stylesheet to apply to generated HTML')
+  .option('-x --template [path]', 'Template to use to generate HTML')
   .action(convertFile)
   .parse(process.argv);
