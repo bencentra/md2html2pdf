@@ -11,7 +11,8 @@ const basicTemplate = require('../templates/basic.html');
 const showdownOptions = {
   tables: true,
   strikethrough: true,
-  ghCodeBlocks: true
+  ghCodeBlocks: true,
+  simplifiedAutoLink: true
 };
 const wkhtmltopdfOptions = {
   pageSize: 'letter'
