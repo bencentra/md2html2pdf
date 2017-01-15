@@ -27,8 +27,7 @@ function errorHandler() {
   console.error.apply(this, errors);
 }
 
-function log() {
-  const messages = arguments;
+function log(...messages) {
   return function() {
     console.log.apply(this, messages);
   }
@@ -63,14 +62,14 @@ class Converter {
   convertMarkdownToHtml(input) {
     return File.readFile(input)
       .then(this.makeHtml.bind(this))
-      .then(log('resume.html created successfully!'))
+      .then(log(`${this.file.name}.html created successfully!`))
       .catch(errorHandler);
   }
 
   convertHtmlToPdf(input) {
     return File.readFile(input)
       .then(this.makePdf.bind(this))
-      .then(log('resume.pdf created successfully!'))
+      .then(log(`${this.file.name}.pdf created successfully!`))
       .catch(errorHandler);
   }
 
